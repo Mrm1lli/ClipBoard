@@ -1,0 +1,5 @@
+# Daily at 07:00 in the cron host's configured timezone. Adjust the checkout path.
+# Create the data directory before installing this entry.
+# Configure BELLHAVEN_API_TOKEN securely, e.g. in an ignored chmod-600 .env file.
+# This only discovers proposals. It NEVER approves or writes CRM records.
+0 7 * * * /absolute/path/to/ClipBoard/scripts/daily.sh >> /absolute/path/to/ClipBoard/data/daily.log 2>&1

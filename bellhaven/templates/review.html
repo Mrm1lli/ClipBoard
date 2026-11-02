@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bellhaven · CRM review</title>
+<style>
+body{font:16px/1.55 system-ui,sans-serif;color:#1c2935;background:#f3f5f7;margin:0}main{max-width:1050px;margin:auto;padding:32px 20px}h1{margin-bottom:4px}header p{margin-top:0;color:#536171}.notice{background:#fff4cf;padding:16px;border-left:4px solid #b78109}article{background:white;border:1px solid #d7dfe5;border-radius:12px;margin:20px 0;padding:24px}.state{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:#526575}pre{background:#f3f5f7;padding:16px;overflow:auto;font-size:13px;white-space:pre-wrap;word-break:break-word}button{padding:10px 16px;border:0;border-radius:6px;cursor:pointer;background:#176447;color:white;font-weight:600}.reject{background:#903d3d}label{display:block}textarea{box-sizing:border-box;width:100%;padding:10px;margin:8px 0}summary{cursor:pointer}h2{font-size:21px}.empty{padding:40px;text-align:center;background:white}nav{display:flex;gap:8px;flex-wrap:wrap}nav a{padding:6px 12px;border-radius:6px;background:#e3e9ed;color:#174b3d;text-decoration:none}table{width:100%;border-collapse:collapse;font-size:14px}td,th{text-align:left;border-bottom:1px solid #ddd;padding:8px;vertical-align:top}.choice{margin-top:14px;padding:16px;border:1px solid #c6d5ce;border-radius:8px}.evidence{background:#f4f8f4;padding:16px}small{color:#586875}
+</style></head><body><main>
+<header><h1>Bellhaven CRM review</h1><p>Website evidence → reviewed decision → verified CRM change</p></header>
+<p class="notice">Approval writes the selected plan to your CRM sandbox immediately. Rejection saves your decision without changing the CRM. No changes run on the daily schedule.</p>
+<nav>{% for state in ['pending','approved','applied','rejected','applying','superseded','all'] %}<a href="{{ url_for('index',state=state) }}">{{ state|title }} ({{ all_proposals|length if state == 'all' else all_proposals|selectattr('state','equalto',state)|list|length }})</a>{% endfor %}</nav>
+{% for proposal in proposals %}
+<article id="{{ proposal.id }}"><div class="state">{{ proposal.state }} · {{ proposal.id[:10] }}</div>
+<h2>{{ proposal.payload.kind|replace('_',' ')|title }} · {{ proposal.payload.get('evidence', {}).get('name', proposal.payload.get('choices',[{}])[0].get('primary',{}).get('before',{}).get('name','Facility')) }}</h2>
+<p>{{ proposal.payload.reason }}</p>
+{% set evidence = proposal.payload.get('evidence',{}) %}
+{% if evidence %}<div class="evidence"><strong>Website evidence</strong>
+{% if evidence.source_url %}<p><a href="{{ evidence.source_url }}" target="_blank" rel="noopener noreferrer">View source location page</a></p>{% endif %}
+<pre>{{ evidence|tojson(indent=2) }}</pre></div>{% endif %}
+{% if proposal.payload.candidates %}<details><summary>Matching scores and signals</summary><pre>{{ proposal.payload.candidates|tojson(indent=2) }}</pre></details>{% endif %}
+{% for choice in proposal.payload.get('choices',[]) %}
+{% set index = loop.index0 %}{% set plan = choice.primary %}
+<div class="choice">
+<h3>{% if choice.survivor_id %}Surviving account: {{ plan.before.name }} <small>{{ choice.survivor_id }}</small>{% else %}Proposed plan{% endif %}</h3>
+{% if plan.kind == 'change_of_ownership' %}<p class="notice">Billing protection: retain the old account and parent. Create the new account below and link the old account through <code>chow_current_account</code>.</p><pre>{{ plan.create|tojson(indent=2) }}</pre>
+{% elif plan.kind == 'create' %}<pre>{{ plan.create|tojson(indent=2) }}</pre>
+{% elif plan.changes %}<table><tr><th>Field</th><th>Current CRM</th><th>Proposed</th></tr>{% for field,value in plan.changes.items() %}<tr><td>{{ field }}</td><td>{{ plan.before.get(field,'') }}</td><td>{{ value }}</td></tr>{% endfor %}</table>
+{% else %}<p>The surviving account already matches; only duplicate records change.</p>{% endif %}
+{% if plan.before %}<details><summary>Original account, including parent and billing history</summary><pre>{{ plan.before|tojson(indent=2) }}</pre></details>{% endif %}
+{% for duplicate in choice.duplicates %}<details open><summary>Mark duplicate Inactive: {{ duplicate.before.name }} · {{ duplicate.account_id }}</summary><p>Link <code>duplicate_of_account</code> to the selected surviving account (or its new ownership successor).</p><pre>{{ duplicate.before|tojson(indent=2) }}</pre></details>{% endfor %}
+{% if proposal.state == 'pending' %}<form method="post" action="{{ url_for('decide',key=proposal.id) }}"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="decision" value="approved"><input type="hidden" name="choice" value="{{ index }}">
+<label>Approval note<textarea name="note" rows="2" placeholder="Explain survivor choice or ownership evidence."></textarea></label>
+<label><input type="checkbox" required> I reviewed this plan and authorize these CRM changes.</label><button>Approve and apply this plan</button></form>{% endif %}
+</div>{% endfor %}
+{% if proposal.state == 'pending' %}<form method="post" action="{{ url_for('decide',key=proposal.id) }}"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="decision" value="rejected"><label>Rejection note<textarea name="note" rows="2" placeholder="Why should this proposal not be applied?"></textarea></label><button class="reject">Reject proposal — no CRM change</button></form>
+{% else %}<p>Decision: {{ proposal.decision_note or 'No note supplied' }}</p>{% endif %}
+{% if proposal.execution_error %}<p class="notice">{{ proposal.execution_error }} Proposal ID: {{ proposal.id }}</p>{% endif %}
+<details><summary>Full evidence and mutation plans</summary><pre>{{ proposal.payload|tojson(indent=2) }}</pre></details>
+</article>
+{% else %}<div class="empty">No {{ current_state }} proposals. Run the daily discovery command to refresh the queue.</div>{% endfor %}
+</main></body></html>
