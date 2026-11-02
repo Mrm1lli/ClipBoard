@@ -15,7 +15,9 @@
 - Approved and Applied are distinct states. Exceptions leave a visible Applying
   entry with a generic safe error; no sensitive response bodies are displayed.
 - API bodies are not documented in OpenAPI. Account field names were inspected
-  read-only. Live POST/PATCH semantics still need the first human-reviewed write.
+  read-only, then live POST/PATCH behavior was confirmed through candidate-approved
+  writes and independent CRM reads. Protected ownership transfer verification remains
+  outstanding until those plans are approved.
 - Creates carry exact operation markers in `note` to recover after lost responses.
   This depends on the API preserving notes. Read-back checks detect incompatibility.
 - No remote conditional writes/transactions are documented. Local locks and baseline

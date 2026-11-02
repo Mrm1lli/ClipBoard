@@ -26,10 +26,19 @@ Approval rechecks CRM state before writing and verifies the result afterward;
 unique create markers support recovery after a lost response. A cron example runs
 read-only proposal generation daily. No LLM calls or paid API keys are required.
 
-**Complete before submission:** Describe the actual approvals/rejections, chosen
-duplicate survivors, verified final CRM results, and any remaining uncertain
-records. The current implementation has not yet performed a live approved write.
-Record actual time spent separately; do not reuse an estimated target as actual time.
+**Review progress (not the final submission state):** Independent CRM reads confirmed
+six updated accounts and one created account. These include the Lima and Findlay
+parent corrections, Findlay care offerings, Chesterton/Grove City/Willow Creek name
+corrections, a New Carlisle address update, and the new Carlisle account. The
+candidate confirmed that local decisions survive a rerun and recorded the demo.
+Protected ownership transfers, duplicate groups, and other substantive findings
+remain to be reviewed. Rejection decisions are local and cannot be inferred from
+remote CRM reads.
+
+**Complete before submission:** Replace this progress paragraph with final verified
+results, explain duplicate survivor choices and any remaining uncertainty, and add
+the shareable video link. Record actual time honestly; do not use the original
+estimate as time spent.
 
 Next I would add server-supported conditional updates/idempotency, operational
 alerts, stronger address parsing, and durable evidence versioning. Client-side

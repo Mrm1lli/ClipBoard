@@ -11,10 +11,11 @@ proposals** (24 updates, 4 creates, 5 duplicate groups, 2 protected ownership ch
 
 The app executes approved plans and verifies each write with a fresh GET. Execution
 has been tested against a simulated CRM, including lost responses and restart
-recovery. **No live proposals have been approved yet; live POST/PATCH compatibility
-and the final corrected CRM still require the first reviewed application.** The API
-OpenAPI document lists write routes but omits request-body schemas; the adapter uses
-field names observed in account reads, with explicit read-back checks.
+recovery. Live CRM reads independently confirmed six updated accounts and one newly
+created account after candidate review. Both live PATCH and POST paths have therefore
+been exercised. Protected ownership transfers and the remaining reconciliation
+still require review and verification. The API OpenAPI document omits request-body
+schemas; the adapter uses observed field names with explicit read-back checks.
 
 The cloud's network and secret settings work. Environment snapshot publication
 failed in the product UI; publication is separate from running this application.
@@ -146,6 +147,8 @@ Tests cover pagination, scraper completeness, matching ambiguity, billing rules,
 rejection persistence, stale-data checks, approval gating, lost-create/patch-response
 recovery, and the approval-to-CRM-to-rerun flow with a fake CRM.
 
+[Final review checklist](docs/FINAL_REVIEW.md) prioritizes substantive corrections
+remaining after the recording.
 [Demo walkthrough and narration](docs/DEMO.md) explains what to present.
 [Submission writeup draft](docs/WRITEUP.md) must be updated with actual review results
 and honest time spent. The exercise is not finished until you apply your reviewed
